@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import supabase from "./supabase";
 import "./style.css";
 
 const CATEGORIES = [
@@ -51,11 +52,25 @@ function Hello() {
   const [facts, setFacts] = useState(initialFacts);
 
   const [showForm, setShowForm] = useState(false);
+
+  useEffect(() => {
+    
+    async function fetchFacts() {
+      
+      const { data: fact, error } = await supabase
+      .from('fact')
+      .select('*')
+      setFacts(fact);
+      console.log(fact);
+
+    }
+  fetchFacts();
+  }, [])
   
   return (
     <>
       <Header showForm={showForm} setShowForm={setShowForm}/>
-      {showForm && <NewFactForm setFacts={setFacts}/>}
+      {showForm && <NewFactForm setFacts={setFacts} setShowForm={setShowForm}/>}
       <main className="main">
         <CategoryFilter />
         <FactList facts={facts}/>
@@ -79,7 +94,7 @@ function Header({showForm, setShowForm}) {
   )
 }
 
-function NewFactForm({setFacts}) {
+function NewFactForm({setFacts, setShowForm}) {
   const [text, setText] = useState("");
   const [source, setSource] = useState("");
   const [category, setCategory] = useState("");
@@ -116,6 +131,8 @@ function NewFactForm({setFacts}) {
       setSource('');
       setCategory('');
     }
+
+    setShowForm(false);
   }
   return (
   <form className="fact-form" onSubmit={handleSubmit}>
